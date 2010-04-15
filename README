@@ -1,0 +1,10 @@
+This is Wendell's code for what will hopefully someday be a curses frontend 
+for ipython.
+
+At the moment, it is more of a prototype - it is not linked into ipython.
+
+Dependencies:
+pygments
+
+To run:
+python interpreterwidget.py
