@@ -37,7 +37,7 @@ if __name__ == '__main__':
     with safescreen(termname) as scr:
         interp = InterpWidget(scr)
         scr.refresh()
-        interp.topwin.addstr(str(curses.COLORS))
+        interp.topwin.addstr("This is where completions would be.")
         interp.topwin.refresh()
         formatter.makebackground(interp.midwin)
         interp.midwin.refresh()
