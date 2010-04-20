@@ -1,5 +1,4 @@
-This is Wendell's code for what will hopefully someday be a curses frontend 
-for ipython.
+This is Wendell's code for what will hopefully someday be a curses frontend for ipython.
 
 At the moment, it is more of a prototype - it is not linked into ipython.
 
@@ -7,4 +6,16 @@ Dependencies:
 pygments
 
 To run:
-python interpreterwidget.py
+python prototype.py
+
+Type in python code, hit CTRL-G to send, and it is displayed in color above.
+Type <CTRL-G> with no text to quit.
+
+To force 256 colors (terminals often have more than they advertise):
+python interpreterwidget.py -c
+
+Use a different pygments style:
+python interpreterwidget.py -s native
+python interpreterwidget.py -s perldoc
+
+It is very basic, but it demonstrates input, output, and code-coloring.

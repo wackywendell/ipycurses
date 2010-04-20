@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 from __future__ import print_function
-from cursesextras import *
 from curses.textpad import Textbox as orig_Textbox
-# /usr/lib/python2.5/curses/textpad.py
 from exceptions import EOFError, KeyboardInterrupt
+
+from cursesextras import *
+# /usr/lib/python2.5/curses/textpad.py
 from basicsequence import BasicMutableSequence
 
 def parsemarkup(obj):
@@ -166,10 +167,25 @@ class ExtendedTextbox(Panelastext):
     
     def move(self, xdist, ydist = 0):
         """Move the cursor the specified amount, wrapping around lines, and not failing at edges."""
-        curx, cury = self.win.getyx()
+        cury, curx = self.win.getyx()
+        maxy, maxx = self.win.maxyx()
         
         curx += xdist
-        if curx <
+        while curx < 0 and cury >= 0:
+            curx += maxx
+            cury -= 1
+            
+        while curx > maxx:
+            curx -= maxx
+            cury += 1
+        
+        if cury < 0:
+            cury = 0
+        if cury > maxy:
+            cury = maxy
+        
+        self.win.move(cury,curx)
+        return cury, curx
     
     def do_command(self, ch):
         """Process a single editing command.
@@ -181,22 +197,19 @@ class ExtendedTextbox(Panelastext):
             return True
         elif curses.ascii.isprint(ch):
             self.win.insch(cury, curx, ch)
-            curx += 1
-            self.win.move(cury,curx)
+            cury, curx = self.move(1)
         elif ch == curses.KEY_LEFT:
-            curx -= 1
-            self.win.move(cury, curx)
+            cury, curx = self.move(-1)
         elif ch == curses.KEY_RIGHT:
-            curx += 1
-            self.win.move(cury, curx)
+            cury, curx = self.move(1)
         elif ch == curses.KEY_BACKSPACE:
-            curx -= 1
-            self.win.move(cury, curx)
+            cury, curx = self.move(-1)
             self.win.delch()
         elif ch == curses.KEY_DC:
             self.win.delch()
         elif ch == curses.KEY_HOME:
-            self.win.move(cury, 0)
+            curx = 0
+            self.win.move(cury, curx)
         elif ch == curses.KEY_END:
             length = len(self.win.instr().rstrip())
             curx += length
