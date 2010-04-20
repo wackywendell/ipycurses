@@ -24,10 +24,11 @@ class Panelastext(BasicMutableSequence):
         """A window is required to instantiate the textbox."""
         self.win = win
         self._maxyx = win.getmaxyx()
-        self._curpos = (0,0) # relative to buffer, not to actual window
-        self._winpos = 0 # where the window is relative to buffer
         self._wrappedlines = set() # lines that are a continuation of the line above
         self._lowerline = -1 # don't go beyond this (pad coord, not line coord)
+    
+    def refresh(self):
+        self.win.refresh()
     
     def _tophyscoord(self, linenum):
         """Returns (begin, end) representing the lines in the pad that 
@@ -160,20 +161,51 @@ class ExtendedTextbox(Panelastext):
         Panelastext.__init__(self, win)
         win.keypad(1)
     
+    def movetoend(self):
+        """Moves cursor to end of current line."""
+    
+    def move(self, xdist, ydist = 0):
+        """Move the cursor the specified amount, wrapping around lines, and not failing at edges."""
+        curx, cury = self.win.getyx()
+        
+        curx += xdist
+        if curx <
+    
     def do_command(self, ch):
         """Process a single editing command.
         
         Returns a boolean, where 'True' indicates editing has finished."""
-        cury, curx = self._curpos
+        cury, curx = self.win.getyx()
         #(maxy, maxx) = self._getlim()
-        if ch == ord('q'):
+        if ch == ord('\n'):
             return True
-        if curses.ascii.isprint(ch):
+        elif curses.ascii.isprint(ch):
             self.win.insch(cury, curx, ch)
             curx += 1
             self.win.move(cury,curx)
-            self.refresh()
-            return False
+        elif ch == curses.KEY_LEFT:
+            curx -= 1
+            self.win.move(cury, curx)
+        elif ch == curses.KEY_RIGHT:
+            curx += 1
+            self.win.move(cury, curx)
+        elif ch == curses.KEY_BACKSPACE:
+            curx -= 1
+            self.win.move(cury, curx)
+            self.win.delch()
+        elif ch == curses.KEY_DC:
+            self.win.delch()
+        elif ch == curses.KEY_HOME:
+            self.win.move(cury, 0)
+        elif ch == curses.KEY_END:
+            length = len(self.win.instr().rstrip())
+            curx += length
+            self.win.move(cury, curx)
+            
+        else:
+            log('ExtendedTextbox.do_command - keyname:', curses.keyname(ch))
+        
+        return False
     
 
     def gather(self):
@@ -182,12 +214,10 @@ class ExtendedTextbox(Panelastext):
         #for y in range(self._lowerline+1):
             #result.append(self._getline(y))
         return '\n'.join(result)
-    
-    def refresh(self):
-        self.win.refresh()
         
     def edit(self):
         "Edit in the widget window and collect the results."
+        self._lowerline = max(self._lowerline, 0)
         log(self._maxyx, self._lowerline)
         while 1:
             ch = self.win.getch()

@@ -4,7 +4,7 @@ import vipad
 from basicsequence import basictester
 
 def main():
-    with vipad.cursessafescreen('xterm-256color') as scr:
+    with vipad.safescreen('xterm-256color') as scr:
         #curses.init_colors()
         curses.use_default_colors()
         maxy, maxx = scr.getmaxyx()
@@ -23,7 +23,7 @@ def main():
         textbox = vipad.Panelastext(win)
         #tb = basictester()
         tb = []
-        test_editbox(textbox, tb)
+        test_textbox(textbox, tb)
         
         win.refresh()
         win.getch()
@@ -49,7 +49,7 @@ def main():
     #print len(tb)
     #print tb
 
-def test_editbox(textbox, tb):
+def test_textbox(textbox, tb):
     textbox.insert(0,'test')
     tb.insert(0,'test')
     list(tb)
@@ -90,5 +90,35 @@ def test_editbox(textbox, tb):
     textbox.append(('123',curses.color_pair(curses.COLOR_RED) | curses.A_BOLD))
     
 
+def mainedit():
+    with vipad.safescreen('xterm-256color') as scr:
+        my, mx = scr.getmaxyx()
+        height = my/2
+        width = mx
+        startx = 0
+        starty = 0
+        textwin = scr.subwin(height, width, startx, starty)
+        textbox = vipad.Panelastext(textwin)
+        height = my -(my/2)
+        width = mx
+        startx = my/2
+        starty = 0
+        editwin = scr.subwin(height, width, startx, starty)
+        editbox = vipad.ExtendedTextbox(editwin)
+        #editbox.append('EDIT')
+        #editbox.refresh()
+        textbox.append('TEXT')
+        textbox.refresh()
+        alltxt = []
+        for i in range(3):
+            editbox[:] = []
+            txt = editbox.edit()
+            alltxt.append(txt)
+            for line in txt.split('\n'):
+                textbox.append(line)
+                textbox.refresh()
+    print repr(alltxt)
+
+
 if __name__ == "__main__":
-    main()
+    mainedit()
