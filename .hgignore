@@ -6,3 +6,5 @@ tests/*.err
 build
 dist
 *.egg-info
+.eric4project
+*.e4?

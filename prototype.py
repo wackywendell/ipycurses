@@ -4,9 +4,10 @@ from optparse import OptionParser
 
 import pygments.lexers, pygments.styles
 
-from cursesextras import safescreen
+from cursesextras import safescreen, log
 from cursespygments import CursesFormatter
 from interpreterwidget import InterpWidget
+import markup
 
 if __name__ == '__main__':
     parser=OptionParser()
@@ -37,21 +38,30 @@ if __name__ == '__main__':
     with safescreen(termname) as scr:
         interp = InterpWidget(scr)
         scr.refresh()
-        interp.topwin.addstr("This is where completions would be.")
+        interp.topwin.addstr("This is where completions would be.\n")
+        interp.topwin.scrollok(1)
         interp.topwin.refresh()
         formatter.makebackground(interp.midwin)
         interp.midwin.refresh()
         allcode = []
+        
+        #interp.midpad.texts.append(markup.Text('123'))
+        #interp.midpad.refresh()
         while True:
-            code = interp.textbox.edit()
+            code = interp.textbox.edit().rstrip()
             if not code:
                 break
             allcode.append(code)
             tokensource = lexer.get_tokens(code)
-            for (plaintext, attr) in \
-                    formatter.formatgenerator(tokensource):
-                interp.midwin.addstr(plaintext, attr)
-            interp.midwin.refresh()
+            
+            textobj = markup.Text(formatter.formatgenerator(tokensource))
+            #wrapped = (textobj)
+            #interp.topwin.addstr(repr(wrapped) + '\n')
+            #interp.topwin.refresh()
+            
+            interp.midpad.texts.append(textobj)
+            #log(interp.midpad.texts)
+            interp.midpad.refresh()
             interp.botwin.clear()
     
     for code in allcode:

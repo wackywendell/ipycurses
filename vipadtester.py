@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import curses
 from curses import textpad
 import vipad

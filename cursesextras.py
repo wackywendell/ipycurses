@@ -72,8 +72,11 @@ def safescreen(termstr=None):
         scr.getch()
     """
     try:
-        if termstr: # modify enviornmental variables to duplicate another term
+        if 'TERM' in os.environ:
             oldterm = os.environ['TERM']
+        else:
+            oldterm = None
+        if termstr: # modify enviornmental variables to duplicate another term
             os.environ['TERM'] = termstr # only way 
         stdscr=curses.initscr()
         log('colors:', curses.tigetnum('colors'),curses.longname())
@@ -93,7 +96,7 @@ def safescreen(termstr=None):
         yield stdscr
         
     finally:
-        if termstr:
+        if termstr and oldterm is not None:
             os.environ['TERM'] = oldterm
         try:
             stdscr.keypad(0)
@@ -106,7 +109,7 @@ def safescreen(termstr=None):
         except:
             pass
 
-if __name__ == '__main__':
+def safescrtest():
     with safescreen('xterm-256color') as scr:
         for colnum in range(curses.COLORS):
             r,g,b = colors256[colnum]

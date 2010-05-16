@@ -1,10 +1,50 @@
 import curses
-from cursesextras import safescreen
-from vipad import Panelastext
 from curses.textpad import Textbox
-import pygments.lexers, pygments.styles
-from cursespygments import CursesFormatter
-from optparse import OptionParser
+import textwrap
+
+from vipad import Panelastext
+#from cursesextras import log
+
+class TextPanel(object):
+    def __init__(self, win):
+        self.win = win
+        self.texts = []
+        self.firstline = 0
+        self.wrapper = textwrap.TextWrapper()
+    
+    def _updatewidth(self):
+        self.width, self.height = self.win.getmaxyx()
+    
+    def _getlines(self):
+        self._updatewidth()
+        lines = []
+        self.wrapper.width = self.width
+        for t in self.texts:
+            t.wrapper = self.wrapper
+            lines.extend(t.wrappedlines())
+        return lines
+    
+    def update(self):
+        self._updatewidth()
+        lines = self._getlines()
+        start = self.firstline
+        end = self.firstline + self.height
+        self.win.move(0,0)
+        for l in lines[start:]:
+            for t, a in l:
+                if a is not None:
+                    self.win.addstr(t,a)
+                else:
+                    self.win.addstr(t)
+            try:
+                self.win.addstr('\n')
+            except:
+                break
+        
+    def refresh(self):
+        self.update()
+        self.win.refresh()
+        # call
 
 class InterpWidget(object):
     def __init__(self, win, topsize=4, botsize=4):
@@ -20,7 +60,7 @@ class InterpWidget(object):
         locy = topsize + 1
         
         self.midwin = curses.newwin(height, width,locy,locx)
-        self.midpad = Panelastext(self.midwin)
+        self.midpad = TextPanel(self.midwin)
         
         height = botsize
         width = self.maxx
