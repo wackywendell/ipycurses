@@ -12,10 +12,10 @@ Type in python code, hit CTRL-G to send, and it is displayed in color above.
 Type <CTRL-G> with no text to quit.
 
 To force 256 colors (terminals often have more than they advertise):
-python interpreterwidget.py -c
+python prototype.py -c
 
 Use a different pygments style:
-python interpreterwidget.py -s native
-python interpreterwidget.py -s perldoc
+python prototype.py -s native
+python prototype.py -s perldoc
 
 It is very basic, but it demonstrates input, output, and code-coloring.
